@@ -11,9 +11,6 @@ const {
   generateReleaseNote,
 } = require("./conventional-release.js");
 
-console.log(process.cwd());
-console.log(github.context);
-
 async function init(github) {
   const { actor: username } = github.context;
   const octokit = github.getOctokit(process.env.GITHUB_TOKEN);
