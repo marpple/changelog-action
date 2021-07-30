@@ -2,10 +2,9 @@
   "name": "changelog-action",
   "version": "1.0.0",
   "description": "Conventional changelog for marpple",
-  "main": "dist/main.js",
+  "main": "src/main.js",
   "scripts": {
-    "build": "ncc build src/index.js --license licenses.txt",
-    "deploy": "np --no-tests --no-publish"
+    "deploy": "npx np --no-tests --no-publish"
   },
   "repository": {
     "type": "git",
@@ -38,9 +37,5 @@
     "semver": "^7.3.5",
     "simple-git": "^2.41.1",
     "through2": "^4.0.2"
-  },
-  "devDependencies": {
-    "@vercel/ncc": "^0.29.0",
-    "np": "^7.5.0"
   }
 }
