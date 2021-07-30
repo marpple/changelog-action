@@ -1,17 +1,18 @@
 {
   "name": "changelog-action",
   "version": "1.0.0",
-  "description": "",
-  "main": "src/conventional-release.js",
+  "description": "Conventional changelog for marpple",
+  "main": "dist/main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "ncc build src/index.js --license licenses.txt",
+    "deploy": "np --no-tests --no-publish"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/marpple/changelog-action.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "dhl@marpple.com",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/marpple/changelog-action/issues"
