@@ -27,10 +27,16 @@ async function init(github) {
   });
 }
 
+const getCommitHashOfTag = (ref) => _.go(ref, _.split(" "), _.head);
+
 async function main(app, ref, git) {
-  const latest_version = await getLatestVersion(app);
+  const latest_version = await getLatestVersion(app, await git.tags());
   const latest_tag = `${app}@${latest_version}`;
-  const next_version = await getNextVersion(app, latest_tag);
+  const next_version = await getNextVersion(
+    app,
+    latest_tag,
+    getCommitHashOfTag(await git.raw("show-ref", latest_tag))
+  );
   const next_tag = `${app}@${next_version}`;
   const merge_commit_message_body = generateMergeCommitBody(
     await getCommits(latest_tag)

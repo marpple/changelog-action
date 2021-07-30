@@ -12,12 +12,10 @@ const conventionalChangelogConfig = require("conventional-changelog-conventional
 const conventionalGithubReleaser = require("./conventional-github-releaser");
 const _ = require("fxjs");
 const gitRawCommits = require("git-raw-commits");
-const simpleGit = require("simple-git");
-const git = simpleGit();
 
-const getLatestVersion = async (app) =>
+const getLatestVersion = (app, tags) =>
   _.go(
-    await git.tags(),
+    tags,
     _.sel("all"),
     _.filter((a) => a.startsWith(app)),
     _.last,
@@ -52,10 +50,13 @@ const getRecommendation = (parser_options = {}, whatBump = whatBumpAngular) =>
     );
   });
 
-const applyRecommendation = async (app, recommendation) => {
-  const [major, minor, patch] = _.map(
-    Number,
-    _.split(".", await getLatestVersion(app))
+const applyRecommendation = (app, latest_tag, recommendation) => {
+  const [major, minor, patch] = _.go(
+    latest_tag,
+    _.split("@"),
+    _.last,
+    _.split("."),
+    _.map(Number)
   );
   const { releaseType } = recommendation;
   if (releaseType === "major") return `${major + 1}.0.0`;
@@ -71,21 +72,17 @@ const whatBumpFor = _.curry((app, commits) => {
   return whatBumpAngular(scope_filtered_commits);
 });
 
-const getCommitHashForTag = async (tag) =>
-  _.go(await git.raw("show-ref", tag), _.split(" "), _.head);
-
-const getNextVersion = async (app, from) => {
-  const from_hash = await getCommitHashForTag(from);
+const getNextVersion = async (app, from, hash) => {
   const parser_options = _.pick(
     ["headerPattern", "breakingHeaderPattern"],
     (await conventionalChangelogConfig()).conventionalChangelog.parserOpts
   );
   const recommendation = await getRecommendation(parser_options, (commits) => {
-    const from_index = commits.findIndex((c) => c.hash === from_hash);
+    const from_index = commits.findIndex((c) => c.hash === hash);
     const filtered_commits = _.slice(0, from_index, commits);
     return whatBumpFor(app, filtered_commits);
   });
-  return applyRecommendation(app, recommendation);
+  return applyRecommendation(app, from, recommendation);
 };
 
 const npmVersion = async (app, version) => {
