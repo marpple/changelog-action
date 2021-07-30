@@ -1,0 +1,13 @@
+name: "conventional-changelog-marpple"
+description: "Conventional changelog for marpple"
+inputs:
+  app:
+    description: "App name to release"
+    required: true
+  ref:
+    description: "Github ref"
+    required: true
+
+runs:
+  using: "node12"
+  main: "dist/index.js"
