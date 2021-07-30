@@ -1,4 +1,5 @@
 const core = require("@actions/core");
+const github = require("@actions/github");
 const simpleGit = require("simple-git");
 const _ = require("fxjs");
 const {
@@ -9,9 +10,24 @@ const {
   npmVersion,
   generateReleaseNote,
 } = require("./conventional-release.js");
-const git = simpleGit();
 
-async function main(app, ref) {
+console.log(process.cwd());
+console.log(github.context);
+
+async function init(github) {
+  const { actor: username } = github.context;
+  const octokit = github.getOctokit(process.env.GITHUB_TOKEN);
+  const {
+    data: { name, email },
+  } = await octokit.rest.users.getByUsername({
+    username,
+  });
+  return simpleGit(null, {
+    config: [`user.name=${name}`, `user.name=${email}`],
+  });
+}
+
+async function main(app, ref, git) {
   const latest_version = await getLatestVersion(app);
   const latest_tag = `${app}@${latest_version}`;
   const next_version = await getNextVersion(app, latest_tag);
@@ -44,4 +60,4 @@ async function main(app, ref) {
   await generateReleaseNote(app, latest_tag, next_tag);
 }
 
-main(core.getInput("app"), core.getInput("ref"));
+init(github).then((git) => main(core.getInput("app"), github.context.ref, git));
