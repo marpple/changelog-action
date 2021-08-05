@@ -68,7 +68,7 @@ const applyRecommendation = (app, latest_tag, recommendation) => {
 const whatBumpFor = _.curry((app, commits) => {
   const scope_filtered_commits = commits.filter(
     ({ scope }) =>
-      scope === null || scope.replaceAll(" ", "").split(",").includes(app)
+      scope === null || scope.replace(/ /gi, "").split(",").includes(app)
   );
   return whatBumpAngular(scope_filtered_commits);
 });
