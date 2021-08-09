@@ -40,6 +40,9 @@ async function main(app, ref, git) {
   );
   const release_branch = `release-${app}-${next_version}`;
 
+  console.log("latest_version", latest_version);
+  console.log("next_version", next_version);
+
   await git
     .addTag(next_tag)
     .checkoutBranch(release_branch, latest_tag)

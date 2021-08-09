@@ -13,6 +13,7 @@ function semverRegex() {
 }
 
 function transform(chunk, cb) {
+  console.log(chunk);
   if (typeof chunk.gitTags === "string") {
     chunk.version = (chunk.gitTags.match(semverRegex()) ||
       chunk.gitTags.match(/\d*\.\d*\.\d*/) ||
@@ -105,10 +106,7 @@ function conventionalGithubReleaser(
     gitRawCommitsOpts.to = gitRawCommitsOpts.to || tags[0];
 
     console.log("changelogOpts", changelogOpts);
-    console.log("context", context);
     console.log("gitRawCommitsOpts", gitRawCommitsOpts);
-    console.log("parserOpts", parserOpts);
-    console.log("writerOpt", writerOpts);
 
     conventionalChangelog(
       changelogOpts,
@@ -171,6 +169,8 @@ function conventionalGithubReleaser(
     gitSemverTags,
     { tagPrefix: changelogOpts.tagPrefix || "" },
     function (err, tags) {
+      console.log("gitSemverTags");
+      console.log(tags);
       if (err) userCb(err);
       else resolve(tags);
     }
