@@ -157,6 +157,8 @@ const transform = (app) => (chunk, cb) => {
     chunk.version = (chunk.gitTags.match(
       new RegExp(`${app}@\\d*\\.\\d*\\.\\d*`)
     ) || [])[0];
+    console.log("chunk");
+    console.log(chunk);
   }
 
   if (chunk.committerDate) {

@@ -108,7 +108,8 @@ const generateReleaseNote = async (app, from, to) => {
     await writer_opts_angular,
     (err, responses) => {
       if (err) return console.log(err);
-      const { body, html_url } = responses[0].body;
+      console.log(responses);
+      const { body, html_url } = (responses[0] && responses[0].body) || {};
       console.log(body);
       console.log(html_url);
     }
