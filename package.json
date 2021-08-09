@@ -1,6 +1,6 @@
 {
   "name": "changelog-action",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Conventional changelog for marpple",
   "main": "src/main.js",
   "scripts": {
