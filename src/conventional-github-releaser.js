@@ -48,13 +48,6 @@ function conventionalGithubReleaser(
   parserOpts = changelogArgs[3];
   writerOpts = changelogArgs[4];
 
-  changelogOpts = merge(
-    {
-      releaseCount: 1,
-    },
-    changelogOpts
-  );
-
   writerOpts.includeDetails = true;
 
   writerOpts.transform = changelogOpts.transform;
@@ -68,20 +61,11 @@ function conventionalGithubReleaser(
       return;
     }
 
-    const releaseCount = changelogOpts.releaseCount;
-    if (releaseCount !== 0) {
-      gitRawCommitsOpts = assign(
-        {
-          from: tags[releaseCount],
-        },
-        gitRawCommitsOpts
-      );
-    }
-
-    gitRawCommitsOpts.to = gitRawCommitsOpts.to || tags[0];
-
     console.log("changelogOpts", changelogOpts);
+    console.log("context", context);
     console.log("gitRawCommitsOpts", gitRawCommitsOpts);
+    console.log("parserOpts", parserOpts);
+    console.log("writerOpts", writerOpts);
 
     conventionalChangelog(
       changelogOpts,
@@ -144,8 +128,6 @@ function conventionalGithubReleaser(
     gitSemverTags,
     { tagPrefix: changelogOpts.tagPrefix || "" },
     function (err, tags) {
-      console.log("gitSemverTags");
-      console.log(tags);
       if (err) userCb(err);
       else resolve(tags);
     }
@@ -153,22 +135,16 @@ function conventionalGithubReleaser(
 }
 
 const transform = (app) => (chunk, cb) => {
-  if (typeof chunk.gitTags === "string") {
-    chunk.version = (chunk.gitTags.match(
-      new RegExp(`${app}@\\d*\\.\\d*\\.\\d*`)
-    ) || [])[0];
-    console.log("chunk");
-    console.log(chunk);
+  const regex = new RegExp(`${app}@\\d*\\.\\d*\\.\\d*`);
+  if (regex.test(chunk.gitTags)) {
+    chunk.version = chunk.gitTags.match(regex)[0].split("@")[1];
   }
-
   if (chunk.committerDate) {
     chunk.committerDate = dateFormat(chunk.committerDate, "yyyy-mm-dd", true);
   }
-
   if (typeof chunk.hash === "string") {
     chunk.shortHash = chunk.hash.substring(0, 7);
   }
-
   if (typeof cb === "function") cb(null, chunk);
   else return chunk;
 };
