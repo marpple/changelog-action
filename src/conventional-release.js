@@ -92,7 +92,7 @@ const npmVersion = async (app, version) => {
 };
 
 const generateReleaseNote = async (app, from, to) => {
-  conventionalGithubReleaser(
+  conventionalGithubReleaser(app)(
     {
       type: "oauth",
       url: "https://api.github.com",

@@ -8,30 +8,6 @@ const Q = require("q");
 const semver = require("semver");
 const through = require("through2");
 
-function semverRegex() {
-  return /(?<=^v?|\sv?)(?:(?:0|[1-9]\d*)\.){2}(?:0|[1-9]\d*)(?:-(?:0|[1-9]\d*|[\da-z-]*[a-z-][\da-z-]*)(?:\.(?:0|[1-9]\d*|[\da-z-]*[a-z-][\da-z-]*))*)?(?:\+[\da-z-]+(?:\.[\da-z-]+)*)?\b/gi;
-}
-
-function transform(chunk, cb) {
-  console.log(chunk);
-  if (typeof chunk.gitTags === "string") {
-    chunk.version = (chunk.gitTags.match(semverRegex()) ||
-      chunk.gitTags.match(/\d*\.\d*\.\d*/) ||
-      [])[0];
-  }
-
-  if (chunk.committerDate) {
-    chunk.committerDate = dateFormat(chunk.committerDate, "yyyy-mm-dd", true);
-  }
-
-  if (typeof chunk.hash === "string") {
-    chunk.shortHash = chunk.hash.substring(0, 7);
-  }
-
-  if (typeof cb === "function") cb(null, chunk);
-  else return chunk;
-}
-
 /* eslint max-params: ["error", 7] */
 function conventionalGithubReleaser(
   auth,
@@ -74,7 +50,6 @@ function conventionalGithubReleaser(
 
   changelogOpts = merge(
     {
-      transform: transform,
       releaseCount: 1,
     },
     changelogOpts
@@ -82,7 +57,7 @@ function conventionalGithubReleaser(
 
   writerOpts.includeDetails = true;
 
-  writerOpts.transform = transform;
+  writerOpts.transform = changelogOpts.transform;
 
   // ignore the default header partial
   writerOpts.headerPartial = "";
@@ -177,4 +152,28 @@ function conventionalGithubReleaser(
   );
 }
 
-module.exports = conventionalGithubReleaser;
+const transform = (app) => (chunk, cb) => {
+  if (typeof chunk.gitTags === "string") {
+    chunk.version = (chunk.gitTags.match(
+      new RegExp(`${app}@\\d*\\.\\d*\\.\\d*`)
+    ) || [])[0];
+  }
+
+  if (chunk.committerDate) {
+    chunk.committerDate = dateFormat(chunk.committerDate, "yyyy-mm-dd", true);
+  }
+
+  if (typeof chunk.hash === "string") {
+    chunk.shortHash = chunk.hash.substring(0, 7);
+  }
+
+  if (typeof cb === "function") cb(null, chunk);
+  else return chunk;
+};
+
+module.exports =
+  (app) =>
+  (auth, changelogOpts, ...rest) => {
+    changelogOpts.transform = transform(app);
+    return conventionalGithubReleaser(auth, changelogOpts, ...rest);
+  };
